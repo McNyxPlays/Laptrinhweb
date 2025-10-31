@@ -1,4 +1,4 @@
-// lib/screens/main_screen.dart
+// lib/screens/main_screen.dart (Chỉnh bottom bar cho admin giữ hồ sơ)
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -27,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
       FavoritesScreen(),
       CartScreen(),
       OrderHistoryScreen(),
-      UserProfileScreen(),
+      UserProfileScreen(), // Giữ nguyên hồ sơ cho cả admin
     ];
   }
 
@@ -35,21 +35,9 @@ class _MainScreenState extends State<MainScreen> {
     final auth = Provider.of<AuthProvider>(context, listen: false);
     final user = auth.user;
 
-    if (user == null && (index == 1 || index == 3 || index == 4)) {
-      // Chỉ yêu cầu login cho yêu thích, đơn hàng, hồ sơ
+    if (user == null && index != 0) {
       Navigator.pushNamed(context, '/login');
       return;
-    }
-
-    if (index == 4) {
-      final profile = await auth.getUserRole();
-      if (profile['role'] == 'admin') {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => AdminCakeScreen()),
-        );
-        return;
-      }
     }
 
     setState(() {

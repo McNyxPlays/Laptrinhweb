@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/cake.dart';
 import '../services/firebase_service.dart';
 import '../providers/favorite_provider.dart';
@@ -25,6 +26,22 @@ class _CakeDetailsScreenState extends State<CakeDetailsScreen> {
     'Trung bình': '20cm',
     'Lớn': '25cm',
   };
+  final TextEditingController _commentController = TextEditingController();
+
+  Future<void> _addComment(String cakeId, String userName) async {
+    final text = _commentController.text.trim();
+    if (text.isEmpty) return;
+    await FirebaseFirestore.instance
+        .collection('cakes')
+        .doc(cakeId)
+        .collection('comments')
+        .add({
+          'text': text,
+          'userName': userName,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+    _commentController.clear();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +49,8 @@ class _CakeDetailsScreenState extends State<CakeDetailsScreen> {
     final fp = Provider.of<FavoriteProvider>(context);
     final cp = Provider.of<CartProvider>(context);
     final auth = Provider.of<AuthProvider>(context);
+    final isLoggedIn = auth.user != null;
+    final userName = 'Guest'; // Luôn hiển thị 'Guest'
 
     return Scaffold(
       body: FutureBuilder<Cake>(
@@ -51,16 +70,11 @@ class _CakeDetailsScreenState extends State<CakeDetailsScreen> {
                 expandedHeight: 300,
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
-                  // ĐÃ XÓA: title: Text(cake.name) để xóa chữ overlay trên hình
                   background: Hero(
                     tag: 'cake-${cake.id}',
                     child: CachedNetworkImage(
                       imageUrl: cake.image,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) =>
-                          Container(color: Colors.grey[200]),
-                      errorWidget: (context, url, error) =>
-                          Icon(Icons.cake, size: 100),
                     ),
                   ),
                 ),
@@ -81,7 +95,7 @@ class _CakeDetailsScreenState extends State<CakeDetailsScreen> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          if (auth.user != null)
+                          if (isLoggedIn)
                             IconButton(
                               icon: Icon(
                                 isFavorite
@@ -143,6 +157,65 @@ class _CakeDetailsScreenState extends State<CakeDetailsScreen> {
                             );
                           },
                         ),
+                      SizedBox(height: 32),
+                      Text(
+                        'Bình luận',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (isLoggedIn) ...[
+                        SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _commentController,
+                                decoration: InputDecoration(
+                                  hintText: 'Viết bình luận...',
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.send),
+                              onPressed: () => _addComment(cake.id, userName),
+                            ),
+                          ],
+                        ),
+                      ] else
+                        Text('Vui lòng đăng nhập để bình luận'),
+                      SizedBox(height: 16),
+                      StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('cakes')
+                            .doc(cake.id)
+                            .collection('comments')
+                            .orderBy('timestamp', descending: true)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting)
+                            return CircularProgressIndicator();
+                          final comments = snapshot.data?.docs ?? [];
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: comments.length,
+                            itemBuilder: (context, index) {
+                              final comment =
+                                  comments[index].data()
+                                      as Map<String, dynamic>;
+                              return ListTile(
+                                title: Text(comment['text']),
+                                subtitle: Text(
+                                  'Bởi: Guest - ${comment['timestamp']?.toDate().toString() ?? 'Vừa xong'}',
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),

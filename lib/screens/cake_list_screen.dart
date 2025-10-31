@@ -1,3 +1,4 @@
+// lib/screens/cake_list_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -6,6 +7,9 @@ import '../services/firebase_service.dart';
 import '../providers/favorite_provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/auth_provider.dart';
+import 'admin_cake_screen.dart';
+import 'admin_dashboard_screen.dart';
+import 'admin_order_management_screen.dart';
 
 class CakeListScreen extends StatefulWidget {
   @override
@@ -235,10 +239,7 @@ class _CakeListScreenState extends State<CakeListScreen> {
           ListTile(
             leading: Icon(Icons.shopping_cart),
             title: Text('Giỏ hàng'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/cart');
-            },
+            onTap: () => Navigator.pushNamed(context, '/cart'),
           ),
           ListTile(
             leading: Icon(Icons.account_circle),
@@ -259,6 +260,34 @@ class _CakeListScreenState extends State<CakeListScreen> {
             title: Text('Kiểm tra đơn hàng'),
             onTap: () => Navigator.pushNamed(context, '/order_status'),
           ),
+          if (auth.isAdmin) Divider(),
+          if (auth.isAdmin)
+            ListTile(
+              leading: Icon(Icons.add),
+              title: Text('Thêm sản phẩm'),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => AdminCakeScreen()),
+              ),
+            ),
+          if (auth.isAdmin)
+            ListTile(
+              leading: Icon(Icons.bar_chart),
+              title: Text('Biểu đồ doanh thu'),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => AdminDashboardScreen()),
+              ),
+            ),
+          if (auth.isAdmin)
+            ListTile(
+              leading: Icon(Icons.list),
+              title: Text('Quản lý đơn hàng'),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => AdminOrderManagementScreen()),
+              ),
+            ),
         ],
       ),
     );

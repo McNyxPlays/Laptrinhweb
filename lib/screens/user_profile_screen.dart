@@ -1,3 +1,6 @@
+// lib/screens/user_profile_screen.dart
+import 'package:firebase_auth/firebase_auth.dart'
+    hide AuthProvider; // FIX CONFLICT: HIDE AuthProvider từ firebase_auth
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/firebase_service.dart';
