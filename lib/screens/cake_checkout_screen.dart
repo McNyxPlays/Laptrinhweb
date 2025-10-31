@@ -1,6 +1,6 @@
 // lib/screens/cake_checkout_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // DÙNG ĐỂ COPY
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../services/firebase_service.dart';
 import '../providers/cart_provider.dart';
@@ -19,6 +19,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String _payment = 'Tiền mặt';
   bool _done = false;
   String _orderId = '';
+  bool _showTransferInfo = false; // THÊM ĐỂ HIỂN THỊ HƯỚNG DẪN CK
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +36,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Icon thành công
                 Container(
                   width: 100,
                   height: 100,
@@ -46,23 +46,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   child: Icon(Icons.check, size: 60, color: Colors.white),
                 ),
                 SizedBox(height: 24),
-
-                // Tiêu đề
                 Text(
                   'Thành công!',
                   style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 16),
-
-                // Mã đơn hàng
                 SelectableText(
                   'Mã đơn: $_orderId',
                   style: TextStyle(fontSize: 18, color: Colors.black87),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 32),
-
-                // NÚT SAO CHÉP MÃ
                 ElevatedButton.icon(
                   onPressed: () async {
                     await Clipboard.setData(ClipboardData(text: _orderId));
@@ -86,8 +80,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                 ),
                 SizedBox(height: 16),
-
-                // NÚT VỀ TRANG CHỦ
                 ElevatedButton.icon(
                   onPressed: () =>
                       Navigator.popUntil(context, (route) => route.isFirst),
@@ -162,8 +154,45 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       child: Text('Chuyển khoản'),
                     ),
                   ],
-                  onChanged: (v) => setState(() => _payment = v!),
+                  onChanged: (v) {
+                    setState(() {
+                      _payment = v!;
+                      _showTransferInfo =
+                          v == 'Chuyển khoản'; // HIỂN THỊ HƯỚNG DẪN
+                    });
+                  },
                 ),
+                if (_showTransferInfo) // THÊM PHẦN HƯỚNG DẪN CK
+                  Padding(
+                    padding: EdgeInsets.only(top: 12),
+                    child: Card(
+                      color: Colors.blue[50],
+                      child: Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Hướng dẫn chuyển khoản:',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 8),
+                            Text('Ngân hàng: Vietcombank'),
+                            Text('Số TK: 1234567890'),
+                            Text('Tên TK: Cửa Hàng Bánh Kem'),
+                            Text(
+                              'Nội dung: CK mã đơn (sẽ hiển thị sau khi hoàn tất)',
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Sau khi CK, quay lại app để hoàn tất.',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () async {
