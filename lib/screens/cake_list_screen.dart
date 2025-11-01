@@ -1,4 +1,4 @@
-// lib/screens/cake_list_screen.dart
+// lib/screens/cake_list_screen.dart (Sửa drawer cho guest vào giỏ hàng)
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -236,6 +236,7 @@ class _CakeListScreenState extends State<CakeListScreen> {
                 Navigator.pushNamed(context, '/favorites');
             },
           ),
+          // GỎI HÀNG CHO PHÉP GUEST
           ListTile(
             leading: Icon(Icons.shopping_cart),
             title: Text('Giỏ hàng'),

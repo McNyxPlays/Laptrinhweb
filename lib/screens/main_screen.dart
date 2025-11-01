@@ -1,4 +1,4 @@
-// lib/screens/main_screen.dart (Chỉnh bottom bar cho admin giữ hồ sơ)
+// lib/screens/main_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -27,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
       FavoritesScreen(),
       CartScreen(),
       OrderHistoryScreen(),
-      UserProfileScreen(), // Giữ nguyên hồ sơ cho cả admin
+      UserProfileScreen(),
     ];
   }
 
@@ -35,7 +35,9 @@ class _MainScreenState extends State<MainScreen> {
     final auth = Provider.of<AuthProvider>(context, listen: false);
     final user = auth.user;
 
-    if (user == null && index != 0) {
+    // Chỉ yêu cầu login cho Yêu thích (1), Đơn hàng (3), Hồ sơ (4)
+    // Giỏ hàng (2) cho phép guest
+    if (user == null && (index == 1 || index == 3 || index == 4)) {
       Navigator.pushNamed(context, '/login');
       return;
     }

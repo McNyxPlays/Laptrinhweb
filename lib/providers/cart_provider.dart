@@ -1,3 +1,4 @@
+// lib/providers/cart_provider.dart
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import '../services/firebase_service.dart';
@@ -14,6 +15,9 @@ class CartProvider with ChangeNotifier {
       final data = await FirebaseService.getCart();
       _items = List.from(data['items'] ?? []);
       _total = data['total'] ?? 0;
+    } else {
+      // For guest, keep local cart
+      _total = _items.map((i) => i['subtotal'] as int).sum;
     }
     notifyListeners();
   }
