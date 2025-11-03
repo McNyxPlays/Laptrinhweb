@@ -25,9 +25,18 @@ class _LoginScreenState extends State<LoginScreen> {
       Provider.of<CartProvider>(context, listen: false).fetchCart();
       Navigator.pop(context);
     } catch (e) {
+      String errorMsg = 'Vui lòng nhập lại email hoặc mật khẩu.';
+
+      // Tùy chọn: phân tích lỗi cụ thể từ Firebase (nếu dùng Firebase Auth)
+      if (e.toString().contains('wrong-password') ||
+          e.toString().contains('user-not-found') ||
+          e.toString().contains('invalid-email')) {
+        errorMsg = 'Email hoặc mật khẩu không đúng.';
+      }
+
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      ).showSnackBar(SnackBar(content: Text(errorMsg)));
     }
   }
 

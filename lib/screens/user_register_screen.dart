@@ -12,14 +12,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+  final _confirmPasswordCtrl = TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   void _register() async {
+    if (_passwordCtrl.text != _confirmPasswordCtrl.text) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Mật khẩu nhập lại không khớp!')));
+      return;
+    }
+
+    if (_passwordCtrl.text.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Mật khẩu phải có ít nhất 6 ký tự!')),
+      );
+      return;
+    }
+
     try {
       await Provider.of<AuthProvider>(
         context,
         listen: false,
       ).register(_nameCtrl.text, _emailCtrl.text, _passwordCtrl.text);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Đăng ký thành công!')));
       Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(
@@ -82,6 +101,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   onPressed: () =>
                       setState(() => _obscurePassword = !_obscurePassword),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: Colors.grey[100],
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: _confirmPasswordCtrl,
+              obscureText: _obscureConfirmPassword,
+              decoration: InputDecoration(
+                labelText: 'Nhập lại mật khẩu',
+                prefixIcon: Icon(Icons.lock_outline),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureConfirmPassword
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                  ),
+                  onPressed: () => setState(
+                    () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                  ),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
